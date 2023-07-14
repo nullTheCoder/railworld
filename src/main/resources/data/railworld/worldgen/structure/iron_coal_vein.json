@@ -14,11 +14,12 @@
     }
   ],
   "x": 0,
-  "y": -10,
+  "y": -13,
   "z": 0,
 
   "size": 12,
   "ySize": 7,
+  "extraSize": 6,
 
   "coreY": 1,
 
@@ -29,7 +30,8 @@
   "replaces": "#railworld:replacing/stone",
 
   "decor": [
-    "railworld:trees/coal_iron_tree",
-    "railworld:trees/coal_iron_tree_2"
+    "railworld:coal_iron/totem_0",
+    "railworld:coal_iron/temple_0",
+    "railworld:coal_iron/tree_0"
   ]
 }

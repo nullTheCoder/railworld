@@ -5,14 +5,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.command.argument.BlockStateArgument;
-import net.minecraft.entity.vehicle.CommandBlockMinecartEntity;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.enums.StructureBlockMode;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.command.PlaceCommand;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.*;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
@@ -20,11 +18,8 @@ import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.ServerWorldAccess;
-import net.minecraft.world.StructureWorldAccess;
+import net.minecraft.world.*;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.structure.*;
@@ -44,10 +39,11 @@ public class InfiniteVeinStructure extends Structure {
     private final int coreY;
     private final List<Identifier> decors;
     private final TagKey<Block> replaces;
+    private final int extraSize;
 
     private final static TagKey<Block> replaces_foundation = BlockTags.REPLACEABLE;
 
-    protected InfiniteVeinStructure(Config config, List<BlockConfig> blocks, int x, int y, int z, int size, int ySize, int perOnce, int ticksPerPlace, int coreY, List<Identifier> decors, TagKey<Block> replaces) {
+    protected InfiniteVeinStructure(Config config, List<BlockConfig> blocks, int x, int y, int z, int size, int ySize, int perOnce, int ticksPerPlace, int coreY, List<Identifier> decors, TagKey<Block> replaces, int extraSize) {
         super(config);
         this.blocks = blocks;
         this.x = x;
@@ -60,6 +56,7 @@ public class InfiniteVeinStructure extends Structure {
         this.coreY = coreY;
         this.decors = decors;
         this.replaces = replaces;
+        this.extraSize = extraSize;
     }
 
     public static Codec<BlockConfig> ORE_CODEC = RecordCodecBuilder.create(instance ->
@@ -94,8 +91,9 @@ public class InfiniteVeinStructure extends Structure {
                     Codecs.POSITIVE_INT.fieldOf("ticksPerPlace").forGetter((obj) -> obj.ticksPerPlace),
                     Codecs.rangedInt(-500, 500).fieldOf("coreY").forGetter((obj) -> obj.coreY),
                     Codecs.nonEmptyList(Identifier.CODEC.listOf()).fieldOf("decor").forGetter((obj) -> obj.decors),
-                    TagKey.codec(Registries.BLOCK.getKey()).fieldOf("replaces").forGetter((obj) -> obj.replaces)
-            ).apply(instance, InfiniteVeinStructure::new)
+                    TagKey.codec(Registries.BLOCK.getKey()).fieldOf("replaces").forGetter((obj) -> obj.replaces),
+                    Codecs.POSITIVE_INT.fieldOf("extraSize").forGetter((obj) -> obj.size)
+                    ).apply(instance, InfiniteVeinStructure::new)
     );
 
 
@@ -104,13 +102,12 @@ public class InfiniteVeinStructure extends Structure {
         ChunkPos chunkPos = context.chunkPos();
         int x = chunkPos.getCenterX();
         int z = chunkPos.getCenterZ();
-        int y = context.chunkGenerator().getHeightInGround(x, z, Heightmap.Type.WORLD_SURFACE, context.world(), context.noiseConfig());
-        var pos = new BlockPos(x, y, z);
+        var pos = new BlockPos(x, 0, z);
         return Optional.of(new StructurePosition(pos, (collector) -> {
             try {
                 Identifier template = decors.get(context.random().nextBetween(0, decors.size()-1));
                 collector.addPiece(new Piece(
-                        this, RailWorld.structurePieceType, context.structureTemplateManager(), template, template.toString(), new StructurePlacementData().setPosition(pos).setBoundingBox(BlockBox.create(pos, pos)), pos
+                        this, RailWorld.structurePieceType, context.structureTemplateManager(), template, template.toString(), new StructurePlacementData().setBoundingBox(BlockBox.create(pos, pos)), pos
                 ));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -139,7 +136,7 @@ public class InfiniteVeinStructure extends Structure {
             this.xOffset = structure.x;
             this.yOffset = structure.y;
             this.zOffset = structure.z;
-            this.size = structure.size;
+            this.size = structure.size + placementData.getRandom(pos).nextInt(structure.extraSize);
             this.ySize = structure.ySize;
             this.perOnce = structure.perOnce;
             this.ticksPerPlace = structure.ticksPerPlace;
@@ -207,26 +204,55 @@ public class InfiniteVeinStructure extends Structure {
 
         int counter = 0;
 
+        public void superGenerate(StructureWorldAccess world, StructureAccessor structureAccessor, ChunkGenerator chunkGenerator, Random random, BlockBox chunkBox, BlockPos pivot) {
+            this.placementData.setBoundingBox(chunkBox);
+            this.boundingBox = this.template.calculateBoundingBox(this.placementData, this.pos);
+            if (this.template.place(world, this.pos, pivot, this.placementData, random, 2)) {
+                List<StructureTemplate.StructureBlockInfo> list = this.template.getInfosForBlock(this.pos, this.placementData, Blocks.STRUCTURE_BLOCK);
+
+                for (StructureTemplate.StructureBlockInfo structureBlockInfo : list) {
+                    if (structureBlockInfo.nbt() != null) {
+                        StructureBlockMode structureBlockMode = StructureBlockMode.valueOf(structureBlockInfo.nbt().getString("mode"));
+                        if (structureBlockMode == StructureBlockMode.DATA) {
+                            if (structureBlockInfo.nbt().getString("metadata").equals("vein")) {
+                                BlockPos pos = structureBlockInfo.pos();
+                                var nbt = new NbtCompound();
+                                saveToNbt(nbt);
+
+                                world.setBlockState(pos, RailWorld.infiniteVein.getDefaultState(), 3);
+                                var state = world.getBlockState(pos);
+                                BlockEntity ent = new InfiniteVein.InfiniteVeinEntity(pos, state);
+                                ent.readNbt(nbt);
+                                world.getChunk(pos).setBlockEntity(ent);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         @Override
         public void generate(StructureWorldAccess world, StructureAccessor structureAccessor, ChunkGenerator chunkGenerator, Random random, BlockBox chunkBox, ChunkPos chunkPos, BlockPos pivot) {
             try {
-                var nbt = new NbtCompound();
-                saveToNbt(nbt);
                 var size = template.getSize();
 
                 BlockPos add = new BlockPos((int)Math.floor((double) size.getX() /2), 0, (int)Math.floor((double) size.getZ() /2));
 
-                pos = pos.withY(world.getTopY(Heightmap.Type.WORLD_SURFACE, pos.getX(), pos.getZ())).subtract(add);
-                BlockState stateGround = world.getBlockState(pos.add(0, -2, 0));
+                pos = pos.withY(world.getTopY(Heightmap.Type.WORLD_SURFACE_WG, pos.getX(), pos.getZ())).subtract(add);
+                placementData.setPosition(new BlockPos(0, 0, 0));
+                superGenerate(world, structureAccessor, chunkGenerator, random, chunkBox, pivot);
+
+                pos = pos.add(add);
+
+                BlockState stateGround = world.getBlockState(pos.add(0, -1, 0));
                 if (stateGround.isIn(replaces_foundation)) {
                     stateGround = Blocks.DIRT.getDefaultState();
                 }
-                super.generate(world, structureAccessor, chunkGenerator, random, chunkBox, chunkPos, pivot);
-                pos = pos.add(0, coreY, 0).add(add);
+
                 for (int x = -size.getX()/2-1 ; x < size.getX()/2+1 ; x++) {
                     for (int z = -size.getZ()/2-1 ;z < size.getZ()/2+1 ; z++) {
-                        for (int y = 0; y < 10; y++) {
-                            BlockPos p = pos.add(x, -2 - y, z);
+                        for (int y = 1; y < 10; y++) {
+                            BlockPos p = pos.add(x, - y, z);
                             BlockState state = world.getBlockState(p);
                             if (state.isIn(replaces_foundation) && !state.isLiquid()) {
                                 world.setBlockState(p, stateGround, 3);
@@ -237,11 +263,9 @@ public class InfiniteVeinStructure extends Structure {
                     }
                 }
 
+                pos = pos.add(0, coreY, 0);
+
                 counter ++;
-                 world.setBlockState(pos, RailWorld.infiniteVein.getDefaultState(), 3);
-                var ent = world.getBlockEntity(pos);
-                assert ent != null;
-                ent.readNbt(nbt);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -249,9 +273,7 @@ public class InfiniteVeinStructure extends Structure {
         }
 
         @Override
-        protected void handleMetadata(String metadata, BlockPos pos, ServerWorldAccess world, Random random, BlockBox boundingBox) {
-
-        }
+        protected void handleMetadata(String metadata, BlockPos pos, ServerWorldAccess world, Random random, BlockBox boundingBox) {}
     }
 
     @Override

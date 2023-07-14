@@ -23,7 +23,7 @@ public class InfiniteVeinRenderer implements BlockEntityRenderer<InfiniteVein.In
     public void render(InfiniteVein.InfiniteVeinEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         if (entity.blocks == null || entity.blocks.size() == 0 || entity.getWorld() == null)
             return;
-        if ((int)state >= entity.blocks.size()) {
+        if ((int)state >= entity.blocks.size() || state < 0) {
             state = 0;
         }
         var got = entity.blocks.get((int)state);

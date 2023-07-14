@@ -68,14 +68,14 @@ public class InfiniteVein extends BlockWithEntity {
 
     public static class InfiniteVeinEntity extends BlockEntity {
 
-        private int xOffset, yOffset, zOffset;
+        public int xOffset, yOffset, zOffset;
 
-        private int size;
-        private int ySize;
-        private int perOnce;
-        private int ticksPerPlace;
+        public int size;
+        public int ySize;
+        public int perOnce;
+        public int ticksPerPlace;
 
-        private TagKey<Block> replaces;
+        public TagKey<Block> replaces;
         public List<Pair<Float, Block>> blocks = new ArrayList<>();;
 
         @Nullable
