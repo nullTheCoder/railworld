@@ -30,6 +30,6 @@
   "replaces": "#railworld:replacing/stone",
 
   "decor": [
-    "railworld:gold_iron/tree_3"
+    "railworld:gold_diamond/tree"
   ]
 }
