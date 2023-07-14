@@ -177,6 +177,11 @@ public class InfiniteVeinStructure extends Structure {
             nbt.putInt("len", configs.size());
         }
 
+        @Override
+        public StructurePlacementData getPlacementData() {
+            return super.getPlacementData().setBoundingBox(BlockBox.create(pos, pos));
+        }
+
         private void saveToNbt(NbtCompound nbt) {
             nbt.putInt("xOffset", xOffset);
             nbt.putInt("yOffset", yOffset);
@@ -200,6 +205,8 @@ public class InfiniteVeinStructure extends Structure {
             }
         }
 
+        int counter = 0;
+
         @Override
         public void generate(StructureWorldAccess world, StructureAccessor structureAccessor, ChunkGenerator chunkGenerator, Random random, BlockBox chunkBox, ChunkPos chunkPos, BlockPos pivot) {
             try {
@@ -210,7 +217,7 @@ public class InfiniteVeinStructure extends Structure {
                 BlockPos add = new BlockPos((int)Math.floor((double) size.getX() /2), 0, (int)Math.floor((double) size.getZ() /2));
 
                 pos = pos.withY(world.getTopY(Heightmap.Type.WORLD_SURFACE, pos.getX(), pos.getZ())).subtract(add);
-                BlockState stateGround = world.getBlockState(pos.add(0, -3, 0));
+                BlockState stateGround = world.getBlockState(pos.add(0, -2, 0));
                 if (stateGround.isIn(replaces_foundation)) {
                     stateGround = Blocks.DIRT.getDefaultState();
                 }
@@ -230,7 +237,8 @@ public class InfiniteVeinStructure extends Structure {
                     }
                 }
 
-                world.setBlockState(pos, RailWorld.infiniteVein.getDefaultState(), 3);
+                counter ++;
+                 world.setBlockState(pos, RailWorld.infiniteVein.getDefaultState(), 3);
                 var ent = world.getBlockEntity(pos);
                 assert ent != null;
                 ent.readNbt(nbt);
