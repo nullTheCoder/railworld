@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "boat",
+  "key": {
+    "#": {
+      "item": "minecraft:spyglass"
+    },
+    "d": {
+      "item": "minecraft:diamond"
+    },
+    "c": {
+      "item": "minecraft:chain"
+    },
+    "e": {
+      "item": "minecraft:ender_eye"
+    }
+  },
+  "pattern": [
+    "edc",
+    "d#d",
+    "ede"
+  ],
+  "result": {
+    "item": "railworld:vein_seeking_monocle"
+  },
+  "show_notification": true
+}
