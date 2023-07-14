@@ -1,0 +1,35 @@
+{
+  "type": "railworld:vein_structure",
+  "biomes": "#railworld:has_vein/iron_coal",
+  "spawn_overrides": {},
+
+  "ores": [
+    {
+      "probability": 0.4,
+      "id": "minecraft:gold_ore"
+    },
+    {
+      "probability": 0.6,
+      "id": "minecraft:iron_ore"
+    }
+  ],
+  "x": 0,
+  "y": -30,
+  "z": 0,
+
+  "size": 12,
+  "ySize": 7,
+  "extraSize": 6,
+
+  "coreY": 1,
+
+  "perOnce": 1,
+  "ticksPerPlace": 60,
+
+  "step": "surface_structures",
+  "replaces": "#railworld:replacing/stone",
+
+  "decor": [
+    "railworld:gold_iron/tree_3"
+  ]
+}
