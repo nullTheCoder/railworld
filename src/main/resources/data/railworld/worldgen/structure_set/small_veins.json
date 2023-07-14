@@ -8,7 +8,15 @@
   "structures": [
     {
       "structure": "railworld:small_iron_coal_vein",
-      "weight": 1
+      "weight": 6
+    },
+    {
+      "structure": "railworld:small_iron_vein",
+      "weight": 5
+    },
+    {
+      "structure": "railworld:small_redstone_vein",
+      "weight": 3
     }
   ]
 }

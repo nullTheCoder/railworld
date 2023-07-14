@@ -1,0 +1,32 @@
+{
+  "type": "railworld:vein_structure",
+  "biomes": "#railworld:has_vein/iron_coal",
+  "spawn_overrides": {},
+
+  "ores": [
+    {
+      "probability": 1.0,
+      "id": "minecraft:redstone_ore"
+    }
+  ],
+  "x": 0,
+  "y": -40,
+  "z": 0,
+
+  "size": 2,
+  "ySize": 4,
+  "extraSize": 5,
+
+  "coreY": 1,
+
+  "perOnce": 1,
+  "ticksPerPlace": 600,
+
+  "step": "surface_structures",
+  "replaces": "#railworld:replacing/stone",
+
+  "decor": [
+    "railworld:small_redstone/tree_1",
+    "railworld:small_redstone/stick"
+  ]
+}

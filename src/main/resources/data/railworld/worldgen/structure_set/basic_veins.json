@@ -8,7 +8,11 @@
   "structures": [
     {
       "structure": "railworld:iron_coal_vein",
-      "weight": 1
+      "weight": 9
+    },
+    {
+      "structure": "railworld:iron_vein",
+      "weight": 9
     }
   ]
 }
