@@ -9,6 +9,10 @@
     {
       "structure": "railworld:lapis_diamond_vein",
       "weight": 4
+    },
+    {
+      "structure": "railworld:iron_tree",
+      "weight": 9
     }
   ]
 }

@@ -224,6 +224,7 @@ public class InfiniteVeinStructure extends Structure {
                                 BlockEntity ent = new InfiniteVein.InfiniteVeinEntity(pos, state);
                                 ent.readNbt(nbt);
                                 world.getChunk(pos).setBlockEntity(ent);
+
                             }
                         }
                     }

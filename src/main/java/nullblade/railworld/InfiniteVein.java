@@ -158,7 +158,7 @@ public class InfiniteVein extends BlockWithEntity {
         public Random random;
         public void tick(World world, BlockPos pos, BlockState state) {
             try {
-                ticks++;
+                  ticks++;
                 if (ticks >= ticksPerPlace) {
                     ticks = 0;
                     if (world.isClient()) {
