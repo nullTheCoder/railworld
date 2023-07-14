@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "railworld",
+  "version": "${version}",
+  "name": "Rail World",
+  "description": "Adds a ifinite ore veins to the world (inspired by Factorio's rail world)",
+  "authors": [],
+  "contact": {
+    "repo": "https://github.com/stepangajdukevic/railworld"
+  },
+  "license": "MIT NON-AI License",
+  "icon": "assets/railworld/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "nullblade.railworld.RailWorld"
+    ],
+    "client": [
+      "nullblade.railworld.client.RailWorldClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
