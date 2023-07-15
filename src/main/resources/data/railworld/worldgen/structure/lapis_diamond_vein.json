@@ -28,6 +28,7 @@
 
   "step": "surface_structures",
   "replaces": "#railworld:replacing/stone",
+  "defaultBaseBlock": "minecraft:grass_block",
 
   "decor": [
     "railworld:diamond_lapis/hill_0"

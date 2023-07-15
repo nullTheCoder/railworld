@@ -40,10 +40,23 @@ public class InfiniteVeinStructure extends Structure {
     private final List<Identifier> decors;
     private final TagKey<Block> replaces;
     private final int extraSize;
+    private final TagKey<Block> baseBlock;
+    private final Identifier defaultBaseBlock;
 
-    private final static TagKey<Block> replaces_foundation = BlockTags.REPLACEABLE;
-
-    protected InfiniteVeinStructure(Config config, List<BlockConfig> blocks, int x, int y, int z, int size, int ySize, int perOnce, int ticksPerPlace, int coreY, List<Identifier> decors, TagKey<Block> replaces, int extraSize) {
+    protected InfiniteVeinStructure(Config config,
+                                    List<BlockConfig> blocks,
+                                    int x,
+                                    int y,
+                                    int z,
+                                    int size,
+                                    int ySize,
+                                    int perOnce,
+                                    int ticksPerPlace,
+                                    int coreY,
+                                    List<Identifier> decors,
+                                    TagKey<Block> replaces,
+                                    int extraSize,
+                                    TagKey<Block> baseBlock, Identifier defaultBaseBlock) {
         super(config);
         this.blocks = blocks;
         this.x = x;
@@ -57,6 +70,8 @@ public class InfiniteVeinStructure extends Structure {
         this.decors = decors;
         this.replaces = replaces;
         this.extraSize = extraSize;
+        this.baseBlock = baseBlock;
+        this.defaultBaseBlock = defaultBaseBlock;
     }
 
     public static Codec<BlockConfig> ORE_CODEC = RecordCodecBuilder.create(instance ->
@@ -92,7 +107,9 @@ public class InfiniteVeinStructure extends Structure {
                     Codecs.rangedInt(-500, 500).fieldOf("coreY").forGetter((obj) -> obj.coreY),
                     Codecs.nonEmptyList(Identifier.CODEC.listOf()).fieldOf("decor").forGetter((obj) -> obj.decors),
                     TagKey.codec(Registries.BLOCK.getKey()).fieldOf("replaces").forGetter((obj) -> obj.replaces),
-                    Codecs.POSITIVE_INT.fieldOf("extraSize").forGetter((obj) -> obj.size)
+                    Codecs.POSITIVE_INT.fieldOf("extraSize").forGetter((obj) -> obj.size),
+                    TagKey.codec(Registries.BLOCK.getKey()).optionalFieldOf("allowedBase", BlockTags.REPLACEABLE).forGetter((obj) -> obj.baseBlock),
+                    Identifier.CODEC.optionalFieldOf("defaultBaseBlock", new Identifier("minecraft:stone")).forGetter((obj) -> obj.defaultBaseBlock)
                     ).apply(instance, InfiniteVeinStructure::new)
     );
 
@@ -103,6 +120,7 @@ public class InfiniteVeinStructure extends Structure {
         int x = chunkPos.getCenterX();
         int z = chunkPos.getCenterZ();
         var pos = new BlockPos(x, 0, z);
+
         return Optional.of(new StructurePosition(pos, (collector) -> {
             try {
                 Identifier template = decors.get(context.random().nextBetween(0, decors.size()-1));
@@ -130,6 +148,9 @@ public class InfiniteVeinStructure extends Structure {
 
         private final String replaces;
 
+        private final TagKey<Block> baseBlock;
+        private final Block defaultBaseBlock;
+
         public Piece(InfiniteVeinStructure structure, StructurePieceType type, StructureTemplateManager structureTemplateManager, Identifier id, String template, StructurePlacementData placementData, BlockPos pos) {
             super(type, 0, structureTemplateManager, id, template, placementData, pos);
             this.configs = structure.blocks;
@@ -142,6 +163,8 @@ public class InfiniteVeinStructure extends Structure {
             this.ticksPerPlace = structure.ticksPerPlace;
             this.coreY = structure.coreY;
             this.replaces = structure.replaces.id().toString();
+            this.baseBlock = structure.baseBlock;
+            this.defaultBaseBlock = Registries.BLOCK.get(structure.defaultBaseBlock);
         }
 
         public Piece(StructureTemplateManager manager, NbtCompound nbt) {
@@ -164,6 +187,8 @@ public class InfiniteVeinStructure extends Structure {
             this.ticksPerPlace = nbt.getInt("ticksPerPlace");
             this.coreY = nbt.getInt("coreY");
             this.replaces = nbt.getString("replaces");
+            this.baseBlock = TagKey.of(Registries.BLOCK.getKey(), new Identifier(nbt.getString("baseBlock")));
+            this.defaultBaseBlock = Registries.BLOCK.get(new Identifier(nbt.getString("defaultBaseBlock")));
         }
 
         @Override
@@ -171,7 +196,8 @@ public class InfiniteVeinStructure extends Structure {
             super.writeNbt(context, nbt);
             saveToNbt(nbt);
 
-            nbt.putInt("len", configs.size());
+            nbt.putString("baseBlock", baseBlock.id().toString());
+            nbt.putString("defaultBaseBlock",Registries.BLOCK.getId(defaultBaseBlock).toString());
         }
 
         @Override
@@ -224,7 +250,6 @@ public class InfiniteVeinStructure extends Structure {
                                 BlockEntity ent = new InfiniteVein.InfiniteVeinEntity(pos, state);
                                 ent.readNbt(nbt);
                                 world.getChunk(pos).setBlockEntity(ent);
-
                             }
                         }
                     }
@@ -246,16 +271,16 @@ public class InfiniteVeinStructure extends Structure {
                 pos = pos.add(add);
 
                 BlockState stateGround = world.getBlockState(pos.add(0, -1, 0));
-                if (stateGround.isIn(replaces_foundation)) {
-                    stateGround = Blocks.DIRT.getDefaultState();
+                if (stateGround.isIn(baseBlock)) {
+                    stateGround = defaultBaseBlock.getDefaultState();
                 }
 
                 for (int x = -size.getX()/2-1 ; x < size.getX()/2+1 ; x++) {
                     for (int z = -size.getZ()/2-1 ;z < size.getZ()/2+1 ; z++) {
-                        for (int y = 1; y < 10; y++) {
+                        for (int y = 1; y < 20; y++) {
                             BlockPos p = pos.add(x, - y, z);
                             BlockState state = world.getBlockState(p);
-                            if (state.isIn(replaces_foundation) && !state.isLiquid()) {
+                            if (state.isIn(baseBlock)) {
                                 world.setBlockState(p, stateGround, 3);
                             } else {
                                 break;
