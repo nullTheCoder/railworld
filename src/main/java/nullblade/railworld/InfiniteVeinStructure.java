@@ -36,7 +36,6 @@ public class InfiniteVeinStructure extends Structure {
     private final int ySize;
     private final int perOnce;
     private final int ticksPerPlace;
-    private final int coreY;
     private final List<Identifier> decors;
     private final TagKey<Block> replaces;
     private final int extraSize;
@@ -52,7 +51,6 @@ public class InfiniteVeinStructure extends Structure {
                                     int ySize,
                                     int perOnce,
                                     int ticksPerPlace,
-                                    int coreY,
                                     List<Identifier> decors,
                                     TagKey<Block> replaces,
                                     int extraSize,
@@ -66,7 +64,6 @@ public class InfiniteVeinStructure extends Structure {
         this.ySize = ySize;
         this.perOnce = perOnce;
         this.ticksPerPlace = ticksPerPlace;
-        this.coreY = coreY;
         this.decors = decors;
         this.replaces = replaces;
         this.extraSize = extraSize;
@@ -104,7 +101,6 @@ public class InfiniteVeinStructure extends Structure {
                     Codecs.POSITIVE_INT.fieldOf("ySize").forGetter((obj) -> obj.ySize),
                     Codecs.POSITIVE_INT.fieldOf("perOnce").forGetter((obj) -> obj.perOnce),
                     Codecs.POSITIVE_INT.fieldOf("ticksPerPlace").forGetter((obj) -> obj.ticksPerPlace),
-                    Codecs.rangedInt(-500, 500).fieldOf("coreY").forGetter((obj) -> obj.coreY),
                     Codecs.nonEmptyList(Identifier.CODEC.listOf()).fieldOf("decor").forGetter((obj) -> obj.decors),
                     TagKey.codec(Registries.BLOCK.getKey()).fieldOf("replaces").forGetter((obj) -> obj.replaces),
                     Codecs.POSITIVE_INT.fieldOf("extraSize").forGetter((obj) -> obj.size),
@@ -144,7 +140,6 @@ public class InfiniteVeinStructure extends Structure {
         private final int ySize;
         private final int perOnce;
         private final int ticksPerPlace;
-        private final int coreY;
 
         private final String replaces;
 
@@ -161,7 +156,6 @@ public class InfiniteVeinStructure extends Structure {
             this.ySize = structure.ySize;
             this.perOnce = structure.perOnce;
             this.ticksPerPlace = structure.ticksPerPlace;
-            this.coreY = structure.coreY;
             this.replaces = structure.replaces.id().toString();
             this.baseBlock = structure.baseBlock;
             this.defaultBaseBlock = Registries.BLOCK.get(structure.defaultBaseBlock);
@@ -185,7 +179,6 @@ public class InfiniteVeinStructure extends Structure {
             this.ySize = nbt.getInt("ySize");
             this.perOnce = nbt.getInt("perOnce");
             this.ticksPerPlace = nbt.getInt("ticksPerPlace");
-            this.coreY = nbt.getInt("coreY");
             this.replaces = nbt.getString("replaces");
             this.baseBlock = TagKey.of(Registries.BLOCK.getKey(), new Identifier(nbt.getString("baseBlock")));
             this.defaultBaseBlock = Registries.BLOCK.get(new Identifier(nbt.getString("defaultBaseBlock")));
@@ -227,8 +220,6 @@ public class InfiniteVeinStructure extends Structure {
                 nbt.put(String.valueOf(i), element);
             }
         }
-
-        int counter = 0;
 
         public void superGenerate(StructureWorldAccess world, StructureAccessor structureAccessor, ChunkGenerator chunkGenerator, Random random, BlockBox chunkBox, BlockPos pivot) {
             this.placementData.setBoundingBox(chunkBox);
@@ -288,10 +279,6 @@ public class InfiniteVeinStructure extends Structure {
                         }
                     }
                 }
-
-                pos = pos.add(0, coreY, 0);
-
-                counter ++;
 
             } catch (Exception e) {
                 e.printStackTrace();
