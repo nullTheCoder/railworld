@@ -142,16 +142,4 @@ public class VeinSeekingMonocle extends ArmorItem {
         nbt.putInt("run", run);
 
     }
-
-    @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        ItemStack item = user.getStackInHand(hand);
-
-        if (world.isClient || !(world instanceof ServerWorld serWorld)) {
-            return TypedActionResult.success(item);
-        }
-
-
-        return TypedActionResult.fail(item);
-    }
 }

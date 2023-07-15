@@ -35,22 +35,14 @@ public class RailWorld implements ModInitializer {
         structure =  Registry.register(Registries.STRUCTURE_TYPE, new Identifier("railworld:vein_structure"), () -> InfiniteVeinStructure.CODEC);
         structurePieceType = Registry.register(Registries.STRUCTURE_PIECE, new Identifier("railworld:vein_structure_piece"), (context, nbt) -> new InfiniteVeinStructure.Piece(context.structureTemplateManager(), nbt));
         Item compass = Registry.register(Registries.ITEM, new Identifier("railworld:vein_seeking_monocle"), new VeinSeekingMonocle());
-        try {
-            var group = ItemGroups.class.getField("TOOLS").get(null);
-            ItemGroupEvents.modifyEntriesEvent((RegistryKey<ItemGroup>) group).register(content -> {
-                content.add(compass);
-            });
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            throw new RuntimeException(e);
-        }
-
-        ServerLifecycleEvents.SERVER_STARTED.register((server) -> {
-            buildStructureList(server);
+        // ItemGroups.TOOLS
+        ItemGroupEvents.modifyEntriesEvent(RegistryKey.of(Registries.ITEM_GROUP.getKey(), new Identifier("minecraft:tools_and_utilities"))).register(content -> {
+            content.add(compass);
         });
 
-        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> {
-            buildStructureList(server);
-        });
+        ServerLifecycleEvents.SERVER_STARTED.register(this::buildStructureList);
+
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> buildStructureList(server));
 
     }
 
