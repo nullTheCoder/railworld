@@ -5,6 +5,7 @@ import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
@@ -12,10 +13,13 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.intprovider.IntProvider;
+import net.minecraft.util.math.intprovider.IntProviderType;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
@@ -64,6 +68,33 @@ public class InfiniteVein extends BlockWithEntity {
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
         return checkType(type, entity, (world1, pos, state1, be) -> be.tick(world1, pos, state1));
+    }
+
+    public void onStacksDropped(BlockState state, ServerWorld world, BlockPos pos, ItemStack tool, boolean dropExperience) {
+        if (dropExperience) {
+            this.dropExperienceWhenMined(world, pos, tool, new IntProvider() {
+                @Override
+                public int get(net.minecraft.util.math.random.Random random) {
+                    return world.random.nextBetween(60, 200);
+                }
+
+                @Override
+                public int getMin() {
+                    return 30;
+                }
+
+                @Override
+                public int getMax() {
+                    return 140;
+                }
+
+                @Override
+                public IntProviderType<?> getType() {
+                    return null;
+                }
+            });
+        }
+
     }
 
     public static class InfiniteVeinEntity extends BlockEntity {

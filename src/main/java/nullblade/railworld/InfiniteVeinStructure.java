@@ -275,8 +275,8 @@ public class InfiniteVeinStructure extends Structure {
                     stateGround = defaultBaseBlock.getDefaultState();
                 }
 
-                for (int x = -size.getX()/2-1 ; x < size.getX()/2+1 ; x++) {
-                    for (int z = -size.getZ()/2-1 ;z < size.getZ()/2+1 ; z++) {
+                for (int x = -size.getX()/2-1 ; x < size.getX()/2+2 ; x++) {
+                    for (int z = -size.getZ()/2-1 ;z < size.getZ()/2+2 ; z++) {
                         for (int y = 1; y < 20; y++) {
                             BlockPos p = pos.add(x, - y, z);
                             BlockState state = world.getBlockState(p);
