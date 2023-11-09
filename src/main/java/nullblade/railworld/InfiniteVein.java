@@ -155,27 +155,35 @@ public class InfiniteVein extends BlockWithEntity {
 
         @Override
         protected void writeNbt(NbtCompound nbt) {
-            nbt.putInt("xOffset", xOffset);
-            nbt.putInt("yOffset", yOffset);
-            nbt.putInt("zOffset", zOffset);
+            try {
+                nbt.putInt("xOffset", xOffset);
+                nbt.putInt("yOffset", yOffset);
+                nbt.putInt("zOffset", zOffset);
 
-            nbt.putInt("size", size);
-            nbt.putInt("ySize", ySize);
-            nbt.putInt("perOnce", perOnce);
-            nbt.putInt("ticksPerPlace", ticksPerPlace);
+                nbt.putInt("size", size);
+                nbt.putInt("ySize", ySize);
+                nbt.putInt("perOnce", perOnce);
+                nbt.putInt("ticksPerPlace", ticksPerPlace);
 
-            nbt.putInt("len", blocks.size());
-            nbt.putString("replaces", replaces.id().toString());
+                nbt.putInt("len", blocks.size());
+                nbt.putString("replaces", replaces.id().toString());
 
-            for (int i = 0 ; i < blocks.size() ; i++) {
-                var cfg = blocks.get(i);
-                NbtCompound element = new NbtCompound();
-                element.putString("id", Registries.BLOCK.getId(cfg.getRight()).toString());
-                element.putFloat("probability", cfg.getLeft());
-                nbt.put(String.valueOf(i), element);
+                for (int i = 0; i < blocks.size(); i++) {
+                    var cfg = blocks.get(i);
+                    NbtCompound element = new NbtCompound();
+                    element.putString("id", Registries.BLOCK.getId(cfg.getRight()).toString());
+                    element.putFloat("probability", cfg.getLeft());
+                    nbt.put(String.valueOf(i), element);
+                }
+
+                super.writeNbt(nbt);
+            } catch (Exception e) {
+                if (getWorld() != null) {
+                    e.printStackTrace();
+                    RailWorld.logger.error("Breaking Ore vein core at " + getPos());
+                    getWorld().setBlockState(getPos(), Blocks.AIR.getDefaultState());
+                }
             }
-
-            super.writeNbt(nbt);
         }
 
         public InfiniteVeinEntity(BlockPos pos, BlockState state) {

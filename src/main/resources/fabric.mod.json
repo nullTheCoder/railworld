@@ -4,9 +4,12 @@
   "version": "${version}",
   "name": "Rail World",
   "description": "Adds a ifinite ore veins to the world (inspired by Factorio's rail world)",
-  "authors": [],
+  "authors": [
+    "nullBlade"
+  ],
   "contact": {
-    "repo": "https://github.com/stepangajdukevic/railworld"
+    "homepage": "https://modrinth.com/mod/railworld",
+    "sources": "https://github.com/nullTheCoder/railworld"
   },
   "license": "MIT NON-AI License",
   "icon": "assets/railworld/icon.png",

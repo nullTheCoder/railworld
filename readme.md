@@ -9,7 +9,7 @@ The intention of this mod is to encourage players to set up transportation logis
 
 ## Is this mod incompatible with any other mods?
 While this mod is likely compatible with other mods, there are a few that may impact your experience: <br>
-- Biome generation mods can infinite veins from this mod rarer.
+- Biome generation mods can make infinite veins from this mod rarer.
 - Mods like Waystones mod can make transportation too easy, destroying the intention of this mod.
 
 ## How to add a new ore vein?
